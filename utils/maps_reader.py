@@ -37,3 +37,16 @@ def load_latent_tensors(maps_path, group="validation", split=0):
         latent_tensors_list.append(latent)
 
     return np.array(latent_tensors_list), subjects, sessions
+
+
+def load_session_list(group):
+    """
+    Load all sub/session from tsv
+    """
+    if group == "train" or group == "validation":
+        tsv_file = path.join(maps_path, "groups", group, f"split-{split}", "data.tsv")
+    else:
+        tsv_file = path.join(maps_path, "groups", group, "data.tsv")
+    df = pd.read_csv(tsv_file, sep="\t", usecols=["participant_id", "session_id"])
+    return list(df.to_records(index=False))
+
