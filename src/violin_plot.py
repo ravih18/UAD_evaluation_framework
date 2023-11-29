@@ -6,11 +6,8 @@ import seaborn as sns
 
 from utils.maps_reader import load_session_list
 
-maps_path = "/gpfswork/rech/krk/commun/anomdetect/VAE_evaluation/MAPS_VAE2"
-split = 1
 
-
-def make_dataframe(maps_path, groups):
+def make_dataframe(maps_path, split, groups):
     """
     """
     columns = {
@@ -61,10 +58,10 @@ def make_dataframe(maps_path, groups):
     return results_df
 
 
-def make_violin_plot(maps_path, groups):
+def make_violin_plot(maps_path, split, groups):
     """
     """
-    results_df = make_dataframe(maps_path, groups)
+    results_df = make_dataframe(maps_path, split, groups)
 
     mean_value = results_df[
         results_df["Test group"]==0
@@ -101,6 +98,13 @@ def make_violin_plot(maps_path, groups):
 
 if __name__ == "__main__":
 
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('maps_path')
+    parser.add_argument('-s', '--split', default=0)
+    args = parser.parse_args()
+
     groups = {
         "test_CN": 0,
         "test_hypo_ad_5": 5, 
@@ -114,4 +118,4 @@ if __name__ == "__main__":
         "test_hypo_ad_70": 70,
     }
     
-    make_violin_plot(maps_path, groups)
+    make_violin_plot(args.maps_path, args.split, groups)
