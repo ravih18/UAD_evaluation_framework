@@ -11,16 +11,10 @@ from nilearn.image import resample_to_img
 from utils.maps_reader import load_session_list
 from utils.metrics import healthiness_score
 
-## Parameters
-maps_path = "/gpfswork/rech/krk/commun/anomdetect/VAE_evaluation/MAPS_VAE2"
-split = 1
-
-# Load region mask - il faut resampler le mask à la taille des images
-# utiliser le meme resampling que pour le train
-# Prendre la même dimension reduction que pour les tenseurs
 
 def load_masks(pathology):
     """
+    Load region mask
     """
     caps_dir = "/gpfswork/rech/krk/commun/datasets/adni/caps/caps_pet_uniform"
     img_path = path.join(caps_dir, 
@@ -46,7 +40,7 @@ def load_masks(pathology):
     return pathology_mask, out_mask
 
 
-def compute_metrics(session, group, pathology_mask, reference_mask, columns):
+def compute_metrics(maps_path, split, session, group, pathology_mask, reference_mask, columns):
     """
     """
     sub, ses = session[0], session[1]
@@ -76,23 +70,23 @@ def compute_metrics(session, group, pathology_mask, reference_mask, columns):
     return pd.DataFrame([row1, row2, row3], columns=columns.keys())
 
 
-def make_healthiness_dataframe(groups, columns):
+def make_healthiness_dataframe(maps_path, split, groups, columns):
     """
     """
     results_df = pd.DataFrame(columns) 
 
     for group in groups:
 
-        sessions_list = load_session_list(group)
+        sessions_list = load_session_list(maps_path, group)
         pathology_mask, out_mask = load_masks("ad")
         
         for session in sessions_list:
-            row_df = compute_metrics(session, group, pathology_mask, out_mask, columns)
+            row_df = compute_metrics(maps_path, split, session, group, pathology_mask, out_mask, columns)
             results_df = pd.concat([results_df, row_df])
     return results_df
 
 
-def heathiness_boxplot(groups, figure_name="healthiness"):
+def heathiness_boxplot(maps_path, split, groups, figure_name="healthiness"):
     """
     """
     columns = {
@@ -103,7 +97,7 @@ def heathiness_boxplot(groups, figure_name="healthiness"):
         "healthiness": pd.Series(dtype='float'),
     }
 
-    results_df =  make_healthiness_dataframe(groups, columns)
+    results_df =  make_healthiness_dataframe(maps_path, split, groups, columns)
 
     fig = plt.figure(figsize=(20, 8))
     ax = sns.boxplot(data=results_df, x="group", y="healthiness", hue="measure", orient='v')
@@ -153,6 +147,13 @@ def heathiness_boxplot(groups, figure_name="healthiness"):
 
 if __name__ == "__main__":
 
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('maps_path')
+    parser.add_argument('-s', '--split', default=0)
+    args = parser.parse_args()
+
     groups = [
         "test_hypo_ad_5",
         "test_hypo_ad_10",
@@ -163,7 +164,7 @@ if __name__ == "__main__":
         "test_hypo_ad_50",
         "test_hypo_ad_70",
     ]
-    heathiness_boxplot(groups, 'healtiness_ad')
+    heathiness_boxplot(args.maps_path, args.split, groups, 'healthiness_percentages')
 
     groups = [
         "test_hypo_ad_30",
@@ -173,4 +174,4 @@ if __name__ == "__main__":
         "test_hypo_svppa_30",
         "test_hypo_nfvppa_30",
     ]
-    heathiness_boxplot(groups, 'healtiness_ad')
+    heathiness_boxplot(args.maps_path, args.split, groups, 'healthiness_pathologies')

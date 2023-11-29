@@ -38,24 +38,29 @@ def plot_lmm(X, Y, mdf, metric="mse", colors=['teal', 'skyblue', 'royalblue']):
     plt.savefig(f"plots/{metric}vslatent_lmm.png")
 
 
-with open("data/metric_lmm.pkl", 'rb') as f:
-    metrics = pickle.load(f)
-X_mse, Y_mse, X_ssim, Y_ssim = [], [], [], []
-for val in metrics:
-    X_mse.append(val[1])
-    Y_mse.append(val[2])
-    X_ssim.append(val[1])
-    Y_ssim.append(val[3])
+def make_spaghetti_plots():
+
+    with open("data/metric_lmm.pkl", 'rb') as f:
+        metrics = pickle.load(f)
+    X_mse, Y_mse, X_ssim, Y_ssim = [], [], [], []
+    for val in metrics:
+        X_mse.append(val[1])
+        Y_mse.append(val[2])
+        X_ssim.append(val[1])
+        Y_ssim.append(val[3])
+
+    df = pd.read_csv("data/latentvsimage.tsv", sep="\t")
+
+    md = smf.mixedlm("mse ~ latent", df, groups=df["idx_col"])
+    mdf = md.fit()
+    plot_lmm(X_mse, Y_mse, mdf, "mse", ['teal', 'skyblue', 'royalblue'])
 
 
-df = pd.read_csv("data/latentvsimage.tsv", sep="\t")
+    md = smf.mixedlm("ssim ~ latent", df, groups=df["idx_col"])
+    mdf = md.fit()
+    plot_lmm(X_ssim, Y_ssim, mdf, "ssim", ['tomato', 'salmon', 'lightsalmon'])
 
 
-md = smf.mixedlm("mse ~ latent", df, groups=df["idx_col"])
-mdf = md.fit()
-plot_lmm(X_mse, Y_mse, mdf, "mse", ['teal', 'skyblue', 'royalblue'])
+if __name__ == "__main__":
 
-
-md = smf.mixedlm("ssim ~ latent", df, groups=df["idx_col"])
-mdf = md.fit()
-plot_lmm(X_ssim, Y_ssim, mdf, "ssim", ['tomato', 'salmon', 'lightsalmon'])
+    make_spaghetti_plots()

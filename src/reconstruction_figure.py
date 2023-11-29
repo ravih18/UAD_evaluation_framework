@@ -42,7 +42,7 @@ def get_mask_imgs(pathology="ad", percentage=30):
     return mask_imgs
 
 
-def get_images(sub, ses, pathology='ad', percentage=30):
+def get_images(maps_path, split, sub, ses, pathology='ad', percentage=30):
 
     cn_tensor_dir = join(maps_path, f"split-{split}", "best-loss/test_CN/tensors")
     cn_in_file = join(cn_tensor_dir, f"{sub}_{ses}_image-0_input.pt")
@@ -81,10 +81,10 @@ def get_images(sub, ses, pathology='ad', percentage=30):
     
     return [cn_img, cn_hypo_img]
 
-def plot_reconstruction(sub, ses, pathology="ad", percentage=30):
+def plot_reconstruction(maps_path, split, sub, ses, pathology="ad", percentage=30):
     """
     """
-    images =  get_images(sub, ses, pathology, percentage)
+    images =  get_images(maps_path, split, sub, ses, pathology, percentage)
     mask_imgs = get_mask_imgs(pathology, percentage)
 
     labels_x = [
@@ -150,6 +150,13 @@ def plot_reconstruction(sub, ses, pathology="ad", percentage=30):
 
 if __name__ == "__main__":
 
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('maps_path')
+    parser.add_argument('-s', '--split', default=0)
+    args = parser.parse_args()
+
     sub = "sub-ADNI009S5147"
     ses = "ses-M00"
-    plot_reconstruction(sub, ses)
+    plot_reconstruction(args.maps_path, args.split, sub, ses)

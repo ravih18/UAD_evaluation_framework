@@ -1,28 +1,20 @@
-import os
 from os import path
-import numpy as np
 import pandas as pd
 import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
 import nibabel as nib
 from tqdm.notebook import tqdm
-from nilearn.image import resample_to_img, binarize_img
-from nilearn.masking import apply_mask
-from sklearn.preprocessing import binarize
-from scipy.stats import mannwhitneyu, normaltest
 from statannotations.Annotator import Annotator
 
 from utils.maps_reader import load_session_list
 from utils.metrics import anomaly_score
 
-##
-maps_path = "/gpfswork/rech/krk/commun/anomdetect/VAE_evaluation/MAPS_VAE2"
-split = 1
 
-def get_dataframe(group):
-
-    sessions_list = load_session_list(group)
+def get_dataframe(maps_path, split, group):
+    """
+    """
+    sessions_list = load_session_list(maps_path, group)
 
     # Load atlas
     atlas_gm = nib.load("data/AAL2/AAL2_mni_gm.nii").get_fdata()
@@ -72,7 +64,8 @@ def get_dataframe(group):
     return df
     
 def make_box_plot(df, group):
-    
+    """
+    """
     regions = list(pd.read_csv("data/AAL2/AAL2_new_index.tsv", sep="\t").Region)
     regions.remove('Background')
     
@@ -113,6 +106,13 @@ def make_box_plot(df, group):
 
 if __name__ == "__main__":
 
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('maps_path')
+    parser.add_argument('-s', '--split', default=0)
+    args = parser.parse_args()
+
     group = f"test_hypo_ad_30"
-    df = get_dataframe(group)
+    df = get_dataframe(args.maps_path, args.split, group)
     make_box_plot(df, group)
