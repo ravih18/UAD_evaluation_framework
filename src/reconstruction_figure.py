@@ -81,7 +81,7 @@ def get_images(maps_path, split, sub, ses, pathology='ad', percentage=30):
     
     return [cn_img, cn_hypo_img]
 
-def plot_reconstruction(maps_path, split, sub, ses, pathology="ad", percentage=30):
+def make_reconstruction_plot(maps_path, split, sub, ses, pathology="ad", percentage=30):
     """
     """
     images =  get_images(maps_path, split, sub, ses, pathology, percentage)
@@ -159,4 +159,4 @@ if __name__ == "__main__":
 
     sub = "sub-ADNI009S5147"
     ses = "ses-M00"
-    plot_reconstruction(args.maps_path, args.split, sub, ses)
+    make_reconstruction_plot(args.maps_path, args.split, sub, ses)

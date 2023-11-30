@@ -17,7 +17,7 @@ def embedding_scater(data: list[dict], figure_name: str="embedding"):
     plt.savefig(f"plots/{figure_name}.png")
 
 
-def latent_space_plots(maps_path, split):
+def make_latent_space_plots(maps_path, split):
 
     ## Load latent tensors
     X_train, _, _ = load_latent_tensors(maps_path, "train", split)
@@ -82,4 +82,4 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--split', default=0)
     args = parser.parse_args()
 
-    latent_space_plots(args.maps_path, args.split)
+    make_latent_space_plots(args.maps_path, args.split)

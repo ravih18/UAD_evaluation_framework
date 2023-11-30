@@ -39,7 +39,7 @@ def load_latent_tensors(maps_path, group="validation", split=0):
     return np.array(latent_tensors_list), subjects, sessions
 
 
-def load_session_list(group):
+def load_session_list(maps_path, group):
     """
     Load all sub/session from tsv
     """

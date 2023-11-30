@@ -40,7 +40,7 @@ def load_masks(pathology):
     return pathology_mask, out_mask
 
 
-def compute_metrics(maps_path, split, session, group, pathology_mask, reference_mask, columns):
+def compute_metrics(maps_path, split, session, test_set, pathology_mask, reference_mask, columns):
     """
     """
     sub, ses = session[0], session[1]
@@ -51,60 +51,60 @@ def compute_metrics(maps_path, split, session, group, pathology_mask, reference_
     gt_array = torch.load(gt_path).numpy()
     
     input_file = sub + "_" + ses + "_image-0_input.pt"
-    input_path = path.join(maps_path, f"split-{split}", "best-loss", group, "tensors", input_file)
+    input_path = path.join(maps_path, f"split-{split}", "best-loss", test_set, "tensors", input_file)
     input_array = torch.load(input_path).numpy()
     
     recon_file = sub + "_" + ses + "_image-0_output.pt"
-    recon_path = path.join(maps_path, f"split-{split}", "best-loss", group, "tensors", recon_file)
+    recon_path = path.join(maps_path, f"split-{split}", "best-loss", test_set, "tensors", recon_file)
     recon_array = torch.load(recon_path).detach().numpy()
     
     healthiness_gt = healthiness_score(gt_array, pathology_mask, reference_mask)
     healthiness_input = healthiness_score(input_array, pathology_mask, reference_mask)
     healthiness_recon = healthiness_score(recon_array, pathology_mask, reference_mask)
     
-    group_label = ' '.join(group.upper().split('_')[2:])
-    row1 = [sub, ses, group_label, "ground truth $x$", healthiness_gt]
-    row2 = [sub, ses, group_label, "simulation $x'$", healthiness_input]
-    row3 = [sub, ses, group_label, "reconstruction $\widehat{x'}$", healthiness_recon]
+    test_set_label = ' '.join(test_set.upper().split('_')[2:])
+    row1 = [sub, ses, test_set_label, "ground truth $x$", healthiness_gt]
+    row2 = [sub, ses, test_set_label, "simulation $x'$", healthiness_input]
+    row3 = [sub, ses, test_set_label, "reconstruction $\widehat{x'}$", healthiness_recon]
 
     return pd.DataFrame([row1, row2, row3], columns=columns.keys())
 
 
-def make_healthiness_dataframe(maps_path, split, groups, columns):
+def make_healthiness_dataframe(maps_path, split, test_sets, columns):
     """
     """
     results_df = pd.DataFrame(columns) 
 
-    for group in groups:
+    for test_set in test_sets:
 
-        sessions_list = load_session_list(maps_path, group)
+        sessions_list = load_session_list(maps_path, test_set)
         pathology_mask, out_mask = load_masks("ad")
         
         for session in sessions_list:
-            row_df = compute_metrics(maps_path, split, session, group, pathology_mask, out_mask, columns)
+            row_df = compute_metrics(maps_path, split, session, test_set, pathology_mask, out_mask, columns)
             results_df = pd.concat([results_df, row_df])
     return results_df
 
 
-def heathiness_boxplot(maps_path, split, groups, figure_name="healthiness"):
+def make_heathiness_boxplot(maps_path, split, test_sets, figure_name="healthiness"):
     """
     """
     columns = {
         "participant_id": pd.Series(dtype='str'),
         "session_id": pd.Series(dtype='str'),
-        "group": pd.Series(dtype='str'),
+        "test_set": pd.Series(dtype='str'),
         "measure":pd.Series(dtype='str'),
         "healthiness": pd.Series(dtype='float'),
     }
 
-    results_df =  make_healthiness_dataframe(maps_path, split, groups, columns)
+    results_df =  make_healthiness_dataframe(maps_path, split, test_sets, columns)
 
     fig = plt.figure(figsize=(20, 8))
-    ax = sns.boxplot(data=results_df, x="group", y="healthiness", hue="measure", orient='v')
+    ax = sns.boxplot(data=results_df, x="test_set", y="healthiness", hue="measure", orient='v')
 
     colors = sns.color_palette('tab20')
     handles = []
-    for i in range(len(groups)+1):
+    for i in range(len(test_sets)+1):
 
         if i == 0:
             box_gt = ax.patches[0]
@@ -123,7 +123,7 @@ def heathiness_boxplot(maps_path, split, groups, figure_name="healthiness"):
             handles.append(plt.Rectangle((0, 0), 0, 0, facecolor=rgb1, edgecolor='black'))
             handles.append(plt.Rectangle((0, 0), 0, 0, facecolor=rgb2, edgecolor='black'))
 
-    plt.xlabel("Group", fontsize=20)
+    plt.xlabel("Test sets", fontsize=20)
     plt.ylabel("Healthiness", fontsize=20)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--split', default=0)
     args = parser.parse_args()
 
-    groups = [
+    test_sets_percentages = [
         "test_hypo_ad_5",
         "test_hypo_ad_10",
         "test_hypo_ad_15",
@@ -164,9 +164,9 @@ if __name__ == "__main__":
         "test_hypo_ad_50",
         "test_hypo_ad_70",
     ]
-    heathiness_boxplot(args.maps_path, args.split, groups, 'healthiness_percentages')
+    make_heathiness_boxplot(args.maps_path, args.split, test_sets_percentages, 'healthiness_percentages')
 
-    groups = [
+    test_sets_pathologies = [
         "test_hypo_ad_30",
         "test_hypo_pca_30",
         "test_hypo_bvftd_30",
@@ -174,4 +174,4 @@ if __name__ == "__main__":
         "test_hypo_svppa_30",
         "test_hypo_nfvppa_30",
     ]
-    heathiness_boxplot(args.maps_path, args.split, groups, 'healthiness_pathologies')
+    make_heathiness_boxplot(args.maps_path, args.split, test_sets_pathologies, 'healthiness_pathologies')

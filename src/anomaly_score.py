@@ -4,7 +4,6 @@ import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
 import nibabel as nib
-from tqdm.notebook import tqdm
 from statannotations.Annotator import Annotator
 
 from utils.maps_reader import load_session_list
@@ -21,6 +20,7 @@ def get_dataframe(maps_path, split, group):
     atlas_df = pd.read_csv("data/AAL2/AAL2_new_index.tsv", sep="\t")
     atlas_dict = dict(zip(atlas_df.Region, atlas_df.Value))
     regions = list(atlas_df.Region)
+    regions.remove('Background')
 
     columns = {
         "participant_id": pd.Series(dtype='str'),
@@ -52,7 +52,7 @@ def get_dataframe(maps_path, split, group):
         score_rec = anomaly_score(recon_array, atlas, atlas_dict)
         return score_inp, score_gt, score_rec
 
-    for session in tqdm(sessions_list):
+    for session in sessions_list:
         score_inp, score_gt, score_rec = compute_metrics(session, atlas_gm, atlas_dict)
         for region in regions:
             row = pd.DataFrame([[session[0], session[1], "Simulated image", region, score_inp[region]]], columns=columns.keys())
@@ -61,13 +61,14 @@ def get_dataframe(maps_path, split, group):
             df = pd.concat([df, row])
             row = pd.DataFrame([[session[0], session[1], "Network reconstruction", region, score_rec[region]]], columns=columns.keys())
             df = pd.concat([df, row])
-    return df
+    return df, regions
     
-def make_box_plot(df, group):
+def make_anomaly_box_plot(maps_path ,split , group):
     """
     """
-    regions = list(pd.read_csv("data/AAL2/AAL2_new_index.tsv", sep="\t").Region)
-    regions.remove('Background')
+
+    df, regions = get_dataframe(maps_path, split, group)
+    
     
     pairs = []
     for region in regions:
@@ -113,6 +114,5 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--split', default=0)
     args = parser.parse_args()
 
-    group = f"test_hypo_ad_30"
-    df = get_dataframe(args.maps_path, args.split, group)
-    make_box_plot(df, group)
+    group = "test_hypo_ad_30"
+    make_anomaly_box_plot(args.maps_path, args.split, group)

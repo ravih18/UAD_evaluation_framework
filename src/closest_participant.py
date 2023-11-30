@@ -41,7 +41,7 @@ def make_dataframe(maps_path, split):
     return df_distance
 
 
-def make_boxplot(maps_path, split):
+def make_cp_boxplot(maps_path, split):
     """
     """
     df_distance = make_dataframe(maps_path, split)
@@ -72,4 +72,4 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--split', default=0)
     args = parser.parse_args()
 
-    make_boxplot(args.maps_path, args.split)
+    make_cp_boxplot(args.maps_path, args.split)

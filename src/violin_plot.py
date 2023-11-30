@@ -7,21 +7,21 @@ import seaborn as sns
 from utils.maps_reader import load_session_list
 
 
-def make_dataframe(maps_path, split, groups):
+def make_dataframe(maps_path, split, test_sets):
     """
     """
     columns = {
         "participant_id": pd.Series(dtype='str'),
         "session_id": pd.Series(dtype='str'),
-        "Test group": pd.Series(dtype='int'),
+        "Test set": pd.Series(dtype='int'),
         "Measure": pd.Series(dtype='str'),
         "Metric": pd.Series(dtype='float'),
     }
     results_df = pd.DataFrame(columns)
 
-    for group in groups.keys():
+    for test_set in test_sets:
         # Load all sub/session from tsv
-        sessions_list = load_session_list(maps_path, group)
+        sessions_list = load_session_list(maps_path, test_set)
 
         for session in sessions_list:
             sub, ses = session[0], session[1]
@@ -34,37 +34,36 @@ def make_dataframe(maps_path, split, groups):
 
                 gt_recon_file = sub + "_" + ses + "_image-0_output.pt"
                 gt_recon_path = path.join(maps_path, f"split-{split}", "best-loss", "test_CN", "tensors", gt_recon_file)
-                gt_recon_array = torch.load(gt_recon_path).detach().numpy()
 
                 input_file = sub + "_" + ses + "_image-0_input.pt"
-                input_path = path.join(maps_path, f"split-{split}", "best-loss", group, "tensors", input_file)
+                input_path = path.join(maps_path, f"split-{split}", "best-loss", test_set, "tensors", input_file)
                 input_array = torch.load(input_path).numpy()
 
                 recon_file = sub + "_" + ses + "_image-0_output.pt"
-                recon_path = path.join(maps_path, f"split-{split}", "best-loss", group, "tensors", recon_file)
+                recon_path = path.join(maps_path, f"split-{split}", "best-loss", test_set, "tensors", recon_file)
                 recon_array = torch.load(recon_path).detach().numpy()
 
                 # Compute MSE on whole image
                 mse_gt = ((gt_array[0] - recon_array[0])**2).mean()
                 mse_input = ((input_array[0] - recon_array[0])**2).mean()
 
-                row = [sub, ses, groups[group], "reconstruction $\widehat{x'}$ - ground truth $x$", mse_gt]
+                row = [sub, ses, test_set, "reconstruction $\widehat{x'}$ - ground truth $x$", mse_gt]
                 row_df = pd.DataFrame([row], columns=columns.keys())
                 results_df = pd.concat([results_df, row_df])
-                row = [sub, ses, groups[group], "reconstruction $\widehat{x'}$ - network input $x'$", mse_input]
+                row = [sub, ses, test_set, "reconstruction $\widehat{x'}$ - network input $x'$", mse_input]
                 row_df = pd.DataFrame([row], columns=columns.keys())
                 results_df = pd.concat([results_df, row_df])
 
     return results_df
 
 
-def make_violin_plot(maps_path, split, groups):
+def make_violin_plot(maps_path, split, test_sets):
     """
     """
-    results_df = make_dataframe(maps_path, split, groups)
+    results_df = make_dataframe(maps_path, split, test_sets)
 
     mean_value = results_df[
-        results_df["Test group"]==0
+        results_df["Test set"]==0
     ][
         results_df["Measure"]=="reconstruction $\widehat{x'}$ - ground truth $x$"
     ]["Metric"].mean()
@@ -76,7 +75,7 @@ def make_violin_plot(maps_path, split, groups):
         
         ax = sns.violinplot(
             data=results_df,
-            x='Test group',
+            x='Test set',
             y='Metric',
             hue="Measure",
             split=True,
@@ -105,17 +104,16 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--split', default=0)
     args = parser.parse_args()
 
-    groups = {
-        "test_CN": 0,
-        "test_hypo_ad_5": 5, 
-        "test_hypo_ad_10": 10,
-        "test_hypo_ad_15": 15,
-        "test_hypo_ad_20": 20,
-        "test_hypo_ad_25": 25,
-        "test_hypo_ad_30": 30, 
-        "test_hypo_ad_40": 40,
-        "test_hypo_ad_50": 50,
-        "test_hypo_ad_70": 70,
-    }
+    test_sets = [
+        "test_CN",
+        "test_hypo_ad_5",
+        "test_hypo_ad_10",
+        "test_hypo_ad_15",
+        "test_hypo_ad_20",
+        "test_hypo_ad_30",
+        "test_hypo_ad_40",
+        "test_hypo_ad_50",
+        "test_hypo_ad_70",
+    ]
     
-    make_violin_plot(args.maps_path, args.split, groups)
+    make_violin_plot(args.maps_path, args.split, test_sets)

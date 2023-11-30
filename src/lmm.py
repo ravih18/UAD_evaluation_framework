@@ -39,7 +39,8 @@ def plot_lmm(X, Y, mdf, metric="mse", colors=['teal', 'skyblue', 'royalblue']):
 
 
 def make_spaghetti_plots():
-
+    """
+    """
     with open("data/metric_lmm.pkl", 'rb') as f:
         metrics = pickle.load(f)
     X_mse, Y_mse, X_ssim, Y_ssim = [], [], [], []
