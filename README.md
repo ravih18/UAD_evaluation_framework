@@ -1,5 +1,7 @@
 # Evaluation of pseudo-healthy image reconstruction for anomaly detection in brain FDG PET
 
+[![DOI](https://zenodo.org/badge/721283686.svg)](https://zenodo.org/doi/10.5281/zenodo.10568859)
+
 ## Overview
 
 This repository provides the source code and data necessary to run the evaluation of a deep generative model trained to reconstruct pseudo-healthy images for unsupervised anomaly detection on FDG PET.
