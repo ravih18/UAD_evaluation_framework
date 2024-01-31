@@ -12,11 +12,17 @@ The method is described in the following preprint [Evaluation of pseudo-healthy 
 
 If you use any ressources from this repository, please cite us:
 ```bibtex
-@unpublished{hassanaly2023evaluation,
-  TITLE = {{Evaluation of pseudo-healthy image reconstruction for anomaly detection with deep generative models: Application to brain FDG PET}},
-  AUTHOR = {Hassanaly, Ravi and Brianceau, Camille and Solal, Ma{\"e}lys and Colliot, Olivier and Burgos, Ninon},
-  NOTE = {working paper or preprint},
-  YEAR = {2023},
+@article{melba:2024:003:hassanaly,
+    title = "Evaluation of pseudo-healthy image reconstruction for anomaly detection with deep generative models: Application to brain FDG PET",
+    author = "Hassanaly, Ravi and Brianceau, Camille and Solal, Maëlys and Colliot, Olivier and Burgos, Ninon",
+    journal = "Machine Learning for Biomedical Imaging",
+    volume = "2",
+    issue = "Special Issue for Generative Models",
+    year = "2024",
+    pages = "611--656",
+    issn = "2766-905X",
+    doi = "https://doi.org/10.59275/j.melba.2024-b87a",
+    url = "https://melba-journal.org/2024:003"
 }
 ```
 
