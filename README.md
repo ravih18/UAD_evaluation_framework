@@ -8,7 +8,7 @@ This repository provides the source code and data necessary to run the evaluatio
 
 The model has been trained using the [ClinicaDL](https://clinicadl.readthedocs.io/en/latest/) open source software, and using the [ADNI dataset](https://adni.loni.usc.edu/).
 
-The method is described in the following preprint [Evaluation of pseudo-healthy image reconstruction for anomaly detection with deep generative models: Application to brain FDG PET](https://hal.science/hal-04315738) (currently under revision).
+The method is described in the following article [Evaluation of pseudo-healthy image reconstruction for anomaly detection with deep generative models: Application to brain FDG PET](https://www.melba-journal.org/papers/2024:003.html) (accepted).
 
 If you use any ressources from this repository, please cite us:
 ```bibtex
